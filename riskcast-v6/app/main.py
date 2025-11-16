@@ -13,19 +13,30 @@ os.chdir(project_root)
 
 # Hide Streamlit navigation pages
 st.set_page_config(
-    page_title="RISKCAST v5.5",
+    page_title="RISKCAST v6 — Enterprise Neon Premium",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-from ui.styles import app_config, apply_enterprise_css
+# 🎨 Import CSS + page config
+from ui.styles import app_config, apply_enterprise_css, load_neon_premium_styles
+
+# 📊 Page: Analysis
 from app.pages.analysis import show_analysis
 
+
 def main():
+    # Global config
     app_config()
-    apply_enterprise_css()
+
+    # Load CSS themes
+    apply_enterprise_css()          # Giao diện hiện tại
+    load_neon_premium_styles()      # ⬅ THÊM CSS NEON PREMIUM V6
+
+    # Render main page
     show_analysis()
+
 
 if __name__ == "__main__":
     main()
