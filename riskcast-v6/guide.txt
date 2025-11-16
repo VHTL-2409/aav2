@@ -1,0 +1,95 @@
+
+Mô tả chức năng từng file trong dự án `riskcast-v6`:
+
+1) app/__init__.py
+- Khai báo package `app` và xuất các module con. Giúp import gọn hơn từ `app`.
+
+2) app/main.py
+- Entrypoint giao diện Streamlit. Cấu hình trang, nạp CSS, và gọi `show_analysis()` để hiển thị trang phân tích.
+
+3) app/pages/__init__.py
+- Khai báo các trang con trong `app/pages` (ví dụ `analysis`). Giúp `from app.pages import analysis` hoạt động.
+
+4) app/pages/analysis.py
+- Trang phân tích chính (hàm `show_analysis()`). Hiển thị header, sidebar (cấu hình tham số), gọi `MultiPackageAnalyzer` để chạy phân tích và hiển thị kết quả bằng `display_results`.
+
+5) core/__init__.py
+- Tập trung xuất các module lõi (models, data, mcdm, simulation, risk, forecaster) để dễ import từ `core`.
+
+6) core/models.py
+- Định nghĩa các dataclass và kiểu dữ liệu dùng trong hệ thống, như `AnalysisParams`, `AnalysisResult`, và enum `CriterionType`.
+
+7) core/data.py
+- Dịch vụ dữ liệu: hàm/ class để tải CSV, cache kết quả. Hiện có `DataService.load_historical_data()` và `DataService.get_company_data()`.
+
+8) core/mcdm.py
+- Logic MCDM / TOPSIS và `MultiPackageAnalyzer` — viết luồng phân tích chính: áp fuzzy, MC, tính scores, rank, var/cvar, và gọi forecaster.
+- Lưu ý: tránh import nặng ở cấp module nếu muốn khởi động nhanh.
+
+9) core/simulation.py
+- Hàm/ lớp mô phỏng Monte Carlo (placeholder `run_simulation` / `MonteCarloSimulator`) trả về kết quả mô phỏng rủi ro.
+
+10) core/risk.py
+- Các hàm tính toán rủi ro như `compute_risk`, và tính `VaR` / `CVaR` nếu được triển khai.
+
+11) core/forecaster.py
+- Lớp `Forecaster` xử lý dự báo thời gian (ARIMA nếu `statsmodels` có sẵn; fallback là dự báo đơn giản). Đã thiết kế để import `statsmodels` tùy chọn.
+
+12) ui/__init__.py
+- Khai báo module UI con (styles, components, charts, export).
+
+13) ui/styles.py
+- Hàm `apply_css()` tải file CSS (assets/enterprise.css) và chèn vào Streamlit. Nếu file CSS không tồn tại, hiện thông báo.
+
+14) ui/components.py
+- Các component giao diện tái sử dụng (header, sidebar, display_results). `display_results` sẽ hiển thị bảng kết quả, card gợi ý, nút tải CSV, và (nếu available) các biểu đồ Plotly.
+
+15) ui/charts.py
+- `ChartFactory`: factory tạo các biểu đồ Plotly (pie, scatter, bar, forecast line, so sánh category, fuzzy triangle). Trả về các đối tượng `plotly.graph_objects.Figure`.
+
+16) ui/export.py
+- Các helper xuất dữ liệu (CSV/Excel/PDF). Hiện chứa placeholder `export_csv`.
+
+17) utils/__init__.py
+- Khai báo các tiện ích: `fuzzy`, `helpers`.
+
+18) utils/fuzzy.py
+- Hàm logic mờ (ví dụ `triangular`) và helper fuzzy processing (placeholder).
+
+19) utils/helpers.py
+- Các helper chung nhỏ như `ensure_list`.
+
+20) config/__init__.py
+- Khai báo `constants` và `settings` để dễ import cấu hình.
+
+21) config/constants.py
+- Hằng số dự án: `PROJECT_NAME`, `VERSION`, và có thể `PRIORITY_PROFILES`, `ICC_PACKAGES`, `CRITERIA` (nếu khai báo ở đây).
+
+22) config/settings.py
+- Cấu hình runtime (ví dụ `DEBUG`, `PORT`). Có thể đọc từ biến môi trường.
+
+23) data/historical_climate.csv
+- Dữ liệu mẫu lịch sử (cột `date`, `temperature` hoặc cột route nếu dự án yêu cầu). Dùng để tạo chuỗi lịch sử phục vụ forecaster.
+
+24) data/company_data.csv
+- Dữ liệu mẫu các công ty cùng các tiêu chí (các cột tương ứng CRITERIA), và cột `Company` làm index.
+
+25) tests/test_dummy.py
+- Test mẫu đơn giản (ví dụ assert 1+1==2). Dùng để kiểm tra hệ thống test chạy được.
+
+26) .streamlit/config.toml
+- Cấu hình streamlit (port, enableCORS, headless, ...).
+
+27) requirements.txt
+- Danh sách package cần cài (streamlit, pandas, numpy, plotly, statsmodels, ...). Dùng để `pip install -r requirements.txt`.
+
+28) run.py
+- Runner tiện lợi khởi động Streamlit bằng cách gọi `python run.py` (thực tế chạy `python -m streamlit run app/main.py`).
+
+29) README.md
+- Hướng dẫn khởi động nhanh, mô tả tổng quan dự án, ví dụ lệnh chạy.
+
+- Các tính năng ARIMA/Plotly yêu cầu `statsmodels` và `plotly` được cài trong môi trường; nếu thiếu, module đã có fallback nhưng chức năng sẽ hạn chế.
+- `MultiPackageAnalyzer` trả về `AnalysisResult` gồm `results` (DataFrame), `weights`, `historical`, `forecast`, `var`, `cvar`. `display_results` dựa trên các trường này để hiển thị bảng và biểu đồ.
+- Nếu gặp lỗi import khi chạy Streamlit, kiểm tra `PYTHONPATH` (đã có `run.py` thêm project root vào `sys.path`) và kiểm tra dependency trong `requirements.txt`.
+
